@@ -12,5 +12,7 @@ namespace WebApplication1.Data
         public DB(DbContextOptions<DB> options) : base(options) { }
         
         public DbSet<TodoItem> TodoItems { get; set; }
+
+        public DbSet<SubTask> SubTasks { get; set; }
     }
 }

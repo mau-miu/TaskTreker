@@ -12,7 +12,9 @@
                     <tr>
                         <th scope="col">Title</th>
                         <th scope="col">Is Done</th>
-                        <th scope="col"></th>
+                        <th scope="col">Description</th>
+                        <th scope="col">Update</th>
+                        <th scope="col">Delete</th>
                     </tr>
                 </thead>
                 @foreach (var item in todos)
@@ -23,43 +25,239 @@
                                 <div style="@(item.IsDone ? "color:green; text-decoration: line-through;" : "color:red")">
                                     @item.Title
                                 </div>
-                                
+
                             </td>
                             <td>
-                                @if(!item.IsDone)
-                                 { 
+                                @if (!item.IsDone)
+                                {
                                     <input type="checkbox" value="item.IsDone" @onchange="(() => StatusChanger(item))" />
-                                 }
+                                }
                                 else
-                                 {
+                                {
                                     <input type="checkbox" checked value="item.IsDone" @onchange="(() => StatusChanger(item))" />
-                                 }
+                                }
                             </td>
                             <td>
-                               <button class="btn btn-danger" @onclick="(() => DeleteTodo(item.Id))">Delete</button>
+                                <button class="btn btn-secondary" @onclick="(()=>ModalShow1(item.Id))">Description</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-warning" @onclick="(()=>ModalShow(item.Id))">Update</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-danger" @onclick="(() => DeleteTodo(item.Id))">Delete</button>
                             </td>
                         </tr>
                     </tbody>
                 }
 
-                
+
             </table>
 
 
             <div class="row">
                 <div class="col">
-                    <input class="form-control" placeholder="Type somthing todo" @bind="newTodo"/>
+                    <input class="form-control" placeholder="Type somthing todo" @bind="newTodo" />
                 </div>
                 <div class="col">
                     <button class="btn btn-success" @onclick="AddTodo">Add todo</button>
                 </div>
             </div>
+
         </div>
     </div>
 </div>
 
+
+
+
+@if (showModal)
+{
+    <div class="modal fade show"  id="myModal" style="display:block; overflow-y:scroll;" aria-modal="true" role="dialog" >
+        <div class="modal-dialog modal-lg ">
+            <div class="modal-content ">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Изменить задачу</h4>
+                    <button type="button" class="close" @onclick="@ModalCancel">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <input @bind="selectedToDO.Title" type="text" class="form-control" id="usr">
+                </div>
+
+                <div class="container-fluid">
+                    <div class="row">
+                        <div class="col">
+
+                            <table class="table table-striped">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th scope="col">Title</th>
+                                        <th scope="col">Workers</th>
+                                        <th scope="col">Start date</th>
+                                        <th scope="col">Finish date</th>
+                                        <th scope="col">Delete</th>
+                                    </tr>
+                                </thead>
+                                @foreach (var item in subtask)
+                                {
+                                    <tbody>
+                                        <tr>
+                                            <td>
+                                                <div>
+                                                    @item.Name
+                                                </div>
+
+                                            </td>
+                                            <td>
+                                                <div class="form-group">
+                                                    @*<label for="formGroupExampleInput">Example label</label>*@
+                                                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Участники">
+
+                                                </div>
+
+                                            </td>
+                                            <td>
+                                                <input type="date" @bind="item.Start"/>
+                                            </td>
+                                            <td>
+                                                <input  type="date" @bind="item.Finish" />
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-danger" @onclick="(()=>DeleteSubTask(item.Id))">Delete</button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                }
+
+
+                            </table>
+
+
+                            
+
+
+                            <div class="col">
+                                <div class="col mb-3">
+                                    <input class="form-control" placeholder="Type somthing subtask" @bind="newSubTask" />
+
+                                </div>
+                                <div class="col mb-3">
+                                    <input placeholder="Введите дату окончания задачи" type="date" @bind="SubtaskFinish">
+
+                                </div>
+                                <div class="col mb-3">
+                                    <button class="btn btn-success" @onclick="AddSubTask">Add Subtask</button>
+
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Modal footer -->
+                <div class="modal-footer">
+                    <button type="button" class="btn" @onclick="@ModalCancel">Отмена</button>
+                    <button type="button" class="btn btn-danger" @onclick=@ModalOk>Изменить</button>
+                </div>
+
+            </div>
+        </div>
+    </div>
+}
+
+@if (showModal1)
+{
+    <div class="modal fade show" id="myModal1" style="display:block" aria-modal="true" role="dialog">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Описание задачи</h4>
+                    <button type="button" class="close" @onclick="@ModalCancel1">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col">
+                            <input class="form-control" placeholder="Type some description" @bind="newDescription" />
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-success" @onclick="(() => AddDescription(selectedToDO.Id, newDescription))">Add</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
 @code {
+   
+
+    private string newDescription;
+    private void AddDescription(int Id, string newDescription)
+    {
+        if (!string.IsNullOrWhiteSpace(newDescription))
+        {
+            repository.UpdateToDoDescription(Id, newDescription);
+        }
+        showModal1=false;
+    }
+
+    bool showModal1 = false;
+
+    void ModalShow1(int Id)
+    {
+        showModal1 = true;
+        selectedToDO = todos.Where(All => All.Id == Id).FirstOrDefault();
+        newDescription=selectedToDO.Description;
+    }
+
+
+
+    void ModalCancel1() => showModal1 = false;
+    void ModalOk1()
+    {
+        Console.WriteLine("Modal ok");
+        showModal1 = false;
+    }
+
+
+    ///
+
+    bool showModal = false;
+
+
+    void ModalShow(int Id)
+    {
+        showModal = true;
+        subtask = repository.GetSubTasks(Id);
+        selectedToDO = todos.Where(All => All.Id == Id).FirstOrDefault();
+
+    }
+
+
+
+
+
+
+    void ModalCancel() => showModal = false;
+    void ModalOk()
+    {
+        Console.WriteLine("Modal ok");
+        showModal = false;
+    }
+
+
+
     private IEnumerable<TodoItem> todos = new List<TodoItem>();
+    private IEnumerable<SubTask> subtask = new List<SubTask>();
 
     protected override void OnInitialized()
     {
@@ -80,6 +278,17 @@
         }
     }
 
+    private TodoItem selectedToDO;
+
+
+
+    private void ChangeSubTaskFinishDate(int id)
+    {
+        repository.ChangeSubTaskFinishDate(id, SubtaskFinish);
+    }
+
+
+
     private void DeleteTodo(int Id)
     {
         // todos.Remove(deletedItem);
@@ -90,6 +299,32 @@
     private void StatusChanger(TodoItem chengedItem)
     {
         chengedItem.IsDone = !chengedItem.IsDone;
-        repository.ValueChanged(chengedItem); 
+        repository.ValueChanged(chengedItem);
     }
+
+
+
+
+    private string newSubTask;
+    private DateTime SubtaskFinish;
+
+
+    private void AddSubTask()
+    {
+        if (!string.IsNullOrWhiteSpace(newSubTask))
+        {
+
+            repository.AddSubTask(newSubTask, selectedToDO.Id, SubtaskFinish);
+            newSubTask = string.Empty;
+        }
+    }
+
+    private void DeleteSubTask(int id)
+    {
+        //subtask.Remove(deletedSubTask);
+        repository.DeleteSubTask(id);
+    }
+
+
+
 }
