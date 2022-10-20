@@ -21,15 +21,20 @@ namespace WebApplication1.Data.Repository
 
         void UpdateToDoDescription(int Id, string description);
 
+
+        void UpdateToDoFinishDate(int Id, DateTime FinishDate);
+
         //SubTask
         IEnumerable<SubTask> GetSubTasks(int Id);
 
-        void AddSubTask(string subTask, int ToDoId, DateTime Finish);
+        void AddSubTask(string subTask, int ToDoId, DateTime Finish, string Worker); 
 
         void ValueChanged(SubTask changedSubTask);
 
         void DeleteSubTask(int id);
 
-        void ChangeSubTaskFinishDate(int Id, DateTime FinishDate);
+        void ChangeSubTaskFinishDate(int Id, DateTime FinishDate); //
+
+        void ChangeSubTaskPeople(int Id, string People);
     }
 }

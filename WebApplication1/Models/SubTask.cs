@@ -11,6 +11,7 @@ namespace WebApplication1.Models
         public string Name { get; set; }
         public DateTime Start { get; set; } = DateTime.Now;
         public DateTime Finish { get; set; }
+        public string Worker { get; set; }
         public int TodoIthemId { get; set; }
         public TodoItem TodoItem { get; set; }
     }
