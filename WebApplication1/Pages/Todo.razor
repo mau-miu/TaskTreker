@@ -1,4 +1,5 @@
-﻿@inject WebApplication1.Data.Repository.IRepository repository;
+﻿@inject IJSRuntime JsRuntime;
+@inject WebApplication1.Data.Repository.IRepository repository;
 
 @page "/todo"
 
@@ -13,6 +14,8 @@
                         <th scope="col">Title</th>
                         <th scope="col">Is Done</th>
                         <th scope="col">Description</th>
+                        <th scope="col">Трудоемкость</th>
+                        <th scope="col">Status</th>
                         <th scope="col">Update</th>
                         <th scope="col">Delete</th>
                     </tr>
@@ -39,6 +42,18 @@
                             </td>
                             <td>
                                 <button class="btn btn-secondary" @onclick="(()=>ModalShow1(item.Id))">Description</button>
+                            </td>
+                            <td>
+                                <button class="btn btn-primary" @onclick="(()=>ShowTimeTask(item.Id))">time in days</button>
+                            </td>
+                            <td>
+
+                                <select class="form-select" aria-label="Default select example">
+                                    <option selected>Назначена</option>
+                                    <option value="1">Выполняется</option>
+                                    <option value="2">Приостановлена</option>
+                                    <option value="3">Завершена</option>
+                                </select>
                             </td>
                             <td>
                                 <button class="btn btn-warning" @onclick="(()=>ModalShow(item.Id))">Update</button>
@@ -72,8 +87,8 @@
 
 @if (showModal)
 {
-    <div class="modal fade show"  id="myModal" style="display:block; overflow-y:scroll;" aria-modal="true" role="dialog" >
-        <div class="modal-dialog modal-lg ">
+    <div class="modal fade show" id="myModal" style="display:block; overflow-y:scroll;" aria-modal="true" role="dialog">
+        <div class="modal-dialog modal-xl">
             <div class="modal-content ">
 
                 <!-- Modal Header -->
@@ -83,8 +98,16 @@
                 </div>
 
                 <!-- Modal body -->
+
                 <div class="modal-body">
-                    <input @bind="selectedToDO.Title" type="text" class="form-control" id="usr">
+                    @*selectedToDO*@
+                    <input @onblur="(()=>repository.UpdateToDo(selectedToDO.Id, selectedToDO.Title))" @bind="selectedToDO.Title" type="text" class="form-control" id="usr">
+                    @*@foreach (var item in todos)
+                        {
+
+                        }*@
+
+                    @* <input @bind="selectedToDO.Title" type="text" class="form-control" id="usr">*@
                 </div>
 
                 <div class="container-fluid">
@@ -98,6 +121,7 @@
                                         <th scope="col">Workers</th>
                                         <th scope="col">Start date</th>
                                         <th scope="col">Finish date</th>
+                                        <th scope="col">Total time</th>
                                         <th scope="col">Delete</th>
                                     </tr>
                                 </thead>
@@ -113,16 +137,19 @@
                                             </td>
                                             <td>
                                                 <div class="form-group">
-                                                    <input type="text" class="form-control" id="formGroupExampleInput" placeholder="Workers" @bind="item.Worker"/>
+                                                    <input type="text" class="form-control" placeholder="Workers" @onblur="(()=>repository.UpdateToDoPeople(item.Id, item.Worker))" @bind="item.Worker" />
 
                                                 </div>
 
                                             </td>
                                             <td>
-                                                <input type="date" @onblur="(()=>repository.UpdateToDoFinishDate(item.Id, item.Start))"   @bind="item.Start"/>
+                                                <input type="date" @onblur="(()=>repository.UpdateToDoFinishDate(item.Id, item.Start))" @bind="item.Start" />
                                             </td>
                                             <td>
-                                                <input  type="date" @onblur="(()=>repository.UpdateToDoFinishDate(item.Id, item.Finish))" @bind="item.Finish" />
+                                                <input type="date" @onblur="(()=>repository.UpdateToDoFinishDate(item.Id, item.Finish))" @bind="item.Finish" />
+                                            </td>
+                                            <td>
+                                                <button class="btn btn-secondary" @onclick="(()=>ShowTimeSubTask(item.Id))">Time in days</button>
                                             </td>
                                             <td>
                                                 <button class="btn btn-danger" @onclick="(()=>DeleteSubTask(item.Id))">Delete</button>
@@ -135,7 +162,7 @@
                             </table>
 
 
-                            
+
 
 
                             <div class="col">
@@ -145,11 +172,11 @@
                                 </div>
                                 <div class="col mb-3">
                                     <label class="form-label">Введите имена работников</label>
-                                    <input class="form-control" placeholder="Workers" @bind="SubtaskWorker"/>
+                                    <input class="form-control" placeholder="Workers" @bind="SubtaskWorker" />
                                 </div>
                                 <div class="col mb-3">
                                     <label class="form-label">Введите дату окончания подзадачи</label><br />
-                                    <input placeholder="Введите дату окончания задачи"  type="date" @bind="SubtaskFinish">
+                                    <input placeholder="Введите дату окончания задачи" type="date" @bind="SubtaskFinish">
                                 </div>
                                 <div class="col mb-3">
                                     <button class="btn btn-success" @onclick="AddSubTask">Add Subtask</button>
@@ -209,19 +236,41 @@
         {
             repository.UpdateToDoDescription(Id, newDescription);
         }
-        showModal1=false;
+        showModal1 = false;
     }
 
-    private DateTime newFinishDate;
-    private void AddFinishDate(int Id, DateTime newFinishDate)
+    //private DateTime newFinishDate;
+    //private void AddFinishDate(int Id, DateTime newFinishDate) ///Зачем?
+    //{
+
+    //    if (!string.IsNullOrWhiteSpace(newFinishDate.ToString()))
+    //    {
+    //        repository.UpdateToDoFinishDate(Id, newFinishDate);
+    //    }
+    //    showModal = false;
+    //}
+
+    //посчитать продолжительность задачи
+
+
+
+
+    private async Task ShowTimeTask(int Id)
     {
+        var time=repository.CountTimeTask(Id);
+        await JsRuntime.InvokeVoidAsync("alert", time); // Alert
 
-        if (!string.IsNullOrWhiteSpace(newFinishDate.ToString()))
-        {
-            repository.UpdateToDoFinishDate(Id, newFinishDate);
-        }
-        showModal = false;
+
     }
+
+    private async Task ShowTimeSubTask(int Id)
+    {
+        var time = repository.CountTimeSubTask(Id);
+        await JsRuntime.InvokeVoidAsync("alert", time); // Alert
+
+
+    }
+
 
     bool showModal1 = false;
 
@@ -229,7 +278,7 @@
     {
         showModal1 = true;
         selectedToDO = todos.Where(All => All.Id == Id).FirstOrDefault();
-        newDescription=selectedToDO.Description;
+        newDescription = selectedToDO.Description;
     }
 
 
@@ -332,7 +381,7 @@
 
             repository.AddSubTask(newSubTask, selectedToDO.Id, SubtaskFinish, SubtaskWorker);
             newSubTask = string.Empty;
-            SubtaskFinish = new DateTime();    //не выделяется ли кадлый раз памыть под это и не произойдет ли переполнение памяти?
+            SubtaskFinish = new DateTime();
             SubtaskWorker = string.Empty;
         }
 

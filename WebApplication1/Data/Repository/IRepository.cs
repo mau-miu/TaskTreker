@@ -21,8 +21,19 @@ namespace WebApplication1.Data.Repository
 
         void UpdateToDoDescription(int Id, string description);
 
+        void UpdateToDo(int Id, string todoName);
+
+
+        object CountTimeTask(int Id);
+
+        object CountTimeSubTask(int Id);
+
+
+
 
         void UpdateToDoFinishDate(int Id, DateTime FinishDate);
+
+        void UpdateToDoPeople(int Id, string People);
 
         //SubTask
         IEnumerable<SubTask> GetSubTasks(int Id);
@@ -36,5 +47,7 @@ namespace WebApplication1.Data.Repository
         void ChangeSubTaskFinishDate(int Id, DateTime FinishDate); //
 
         void ChangeSubTaskPeople(int Id, string People);
+
+        bool ChangeTaskStatus(string Status, int Id);
     }
 }

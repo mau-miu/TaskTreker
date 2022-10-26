@@ -20,8 +20,11 @@ namespace WebApplication1.Data.Repository
             TodoItem newItem = new TodoItem()
             {
                 Title = todoName,
+                Appointed=true,
+                IsDoing=false,
+                Stoped=false,
                 IsDone = false,
-                
+               
             };
             _context.TodoItems.Add(newItem);
             _context.SaveChanges();
@@ -67,7 +70,6 @@ namespace WebApplication1.Data.Repository
 
         public IEnumerable<SubTask> GetSubTasks(int Id)
         {
-            //var check = _context.TodoItems.Where(All => All.Id == Id).FirstOrDefault();
             var SubTasks = _context.SubTasks.Where(All=>All.TodoIthemId==Id);
             return SubTasks;
         }
@@ -91,7 +93,6 @@ namespace WebApplication1.Data.Repository
                 Finish = FinishDate,
                 Worker = People
                 
-                //IsDone = false
             };
 
             _context.SubTasks.Add(newSubTask);
@@ -119,6 +120,11 @@ namespace WebApplication1.Data.Repository
             _context.SubTasks.Where(All => All.Id == Id).FirstOrDefault().Worker = People;
         }
 
+        void IRepository.UpdateToDo(int Id, string todoName)
+        {
+            _context.TodoItems.Where(All => All.Id == Id).FirstOrDefault().Title = todoName;
+            _context.SaveChanges();
+        }
 
         void IRepository.UpdateToDoDescription(int Id, string Description)
         {
@@ -130,6 +136,44 @@ namespace WebApplication1.Data.Repository
         {
             _context.SubTasks.Where(All => All.Id == Id).FirstOrDefault().Finish = FinishDate;
             _context.SaveChanges();
+        }
+
+
+        void IRepository.UpdateToDoPeople(int Id, string People)
+        {
+            _context.SubTasks.Where(All => All.Id == Id).FirstOrDefault().Worker = People;
+            _context.SaveChanges();
+        }
+
+
+        object IRepository.CountTimeTask(int Id)
+        {
+            var Subtask= _context.SubTasks.Where(All => All.TodoIthemId == Id).ToList();
+            long total=0;
+            foreach(var i in Subtask)
+            {
+                total+=  i.Finish.Subtract(i.Start).Days;
+                
+            }
+            return total+1;
+        }
+
+        object IRepository.CountTimeSubTask(int Id)
+        {
+            var Subtask = _context.SubTasks.Where(All => All.Id== Id).SingleOrDefault();
+            long total = 0;
+            
+            total += Subtask.Finish.Subtract(Subtask.Start).Days;
+
+            
+            return total + 1;
+        }
+
+        bool IRepository.ChangeTaskStatus(string Status, int Id)
+        {
+            if(Task.Appointed==false)
+                return false;
+            if(Status.ToLower()=="приостановлена")
         }
     }
 }
