@@ -14,5 +14,8 @@ namespace WebApplication1.Data
         public DbSet<TodoItem> TodoItems { get; set; }
 
         public DbSet<SubTask> SubTasks { get; set; }
+
+        public DbSet<Status> Statuses { get; set; }
+
     }
 }

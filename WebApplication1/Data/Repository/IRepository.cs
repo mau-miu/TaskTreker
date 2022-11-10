@@ -8,8 +8,9 @@ namespace WebApplication1.Data.Repository
 {
    public interface IRepository
     {
-        //Task
         IEnumerable<TodoItem> GetAllItems();
+
+        IEnumerable<Status> GetAvailableStatuses(TodoItem ithem);
 
         void AddTodo(string todoName);
 
@@ -23,19 +24,14 @@ namespace WebApplication1.Data.Repository
 
         void UpdateToDo(int Id, string todoName);
 
-
         object CountTimeTask(int Id);
 
         object CountTimeSubTask(int Id);
-
-
-
 
         void UpdateToDoFinishDate(int Id, DateTime FinishDate);
 
         void UpdateToDoPeople(int Id, string People);
 
-        //SubTask
         IEnumerable<SubTask> GetSubTasks(int Id);
 
         void AddSubTask(string subTask, int ToDoId, DateTime Finish, string Worker); 
@@ -44,10 +40,11 @@ namespace WebApplication1.Data.Repository
 
         void DeleteSubTask(int id);
 
-        void ChangeSubTaskFinishDate(int Id, DateTime FinishDate); //
+        void ChangeSubTaskFinishDate(int Id, DateTime FinishDate); 
 
         void ChangeSubTaskPeople(int Id, string People);
 
-        bool ChangeTaskStatus(string Status, int Id);
+        void ChangeStatus(TodoItem ithem);
+
     }
 }

@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using WebApplication1.Models;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebApplication1.Data.Repository
 {
@@ -20,12 +21,11 @@ namespace WebApplication1.Data.Repository
             TodoItem newItem = new TodoItem()
             {
                 Title = todoName,
-                Appointed=true,
-                IsDoing=false,
-                Stoped=false,
                 IsDone = false,
-               
+                StatusId = 1,
+                StatusName = _context.Statuses.Where(All => All.Id == 1).FirstOrDefault().Name,
             };
+            
             _context.TodoItems.Add(newItem);
             _context.SaveChanges();
         }
@@ -65,9 +65,6 @@ namespace WebApplication1.Data.Repository
             _context.SaveChanges();
          }
 
-
-        //SubTask
-
         public IEnumerable<SubTask> GetSubTasks(int Id)
         {
             var SubTasks = _context.SubTasks.Where(All=>All.TodoIthemId==Id);
@@ -82,7 +79,6 @@ namespace WebApplication1.Data.Repository
         
             _context.SaveChanges();
         }
-
 
         public void AddSubTask(string subTask, int ToDoId, DateTime FinishDate, string People)
         {
@@ -169,11 +165,55 @@ namespace WebApplication1.Data.Repository
             return total + 1;
         }
 
-        bool IRepository.ChangeTaskStatus(string Status, int Id)
+        public IEnumerable<Status> GetAllStatuses()
         {
-            if(Task.Appointed==false)
-                return false;
-            if(Status.ToLower()=="приостановлена")
+            return _context.Statuses; 
+        }
+
+        public void ChangeStatus(TodoItem ithemchange)
+        {
+            var item=_context.TodoItems.Where(All=>All.Id== ithemchange.Id).FirstOrDefault();
+            item.StatusId=ithemchange.StatusId;
+            item.StatusName=_context.Statuses.Where(All=>All.Id==ithemchange.StatusId).FirstOrDefault().Name;
+
+           
+           _context.SaveChanges();
+
+        }
+
+        public Status FindById(int id) => _context.Statuses.ToList().Where(all => all.Id == id).FirstOrDefault();
+        public bool TaskDate(int Id)
+        {
+            var Subtasks=_context.SubTasks.Where(All=>All.TodoIthemId==Id).ToList();
+            var DateIsOk=true;
+            foreach(var t in Subtasks)
+            {
+                if(t.Finish.AddDays(1)>DateTime.Now)
+                    DateIsOk=false;
+            }
+            return DateIsOk;
+        }
+
+        public IEnumerable<Status> GetAvailableStatuses(TodoItem ithem)
+        {
+            var AvailableStatuses = new List<Status>();
+            if (ithem.StatusId == 1)
+            {
+                return _context.Statuses.Where(All => All.Id == 2 || All.Id==1).ToList();
+            }
+
+            if (ithem.StatusId == 2 && TaskDate(ithem.Id))
+            {
+                return _context.Statuses.Where(All => All.Id == 3 || All.Id == 4).ToList();
+            }
+
+            if (ithem.StatusId == 3)
+            {
+                return _context.Statuses.Where(All => All.Id == 2 || All.Id == 4).ToList();
+            }
+
+            return new List<Status>();
         }
     }
+
 }

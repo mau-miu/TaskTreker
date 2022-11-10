@@ -2,6 +2,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace WebApplication1.Models
 {
@@ -14,5 +16,6 @@ namespace WebApplication1.Models
         public string Worker { get; set; } 
         public int TodoIthemId { get; set; }
         public TodoItem TodoItem { get; set; }
+        
     }
 }

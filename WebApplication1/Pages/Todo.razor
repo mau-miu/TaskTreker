@@ -1,5 +1,6 @@
 ﻿@inject IJSRuntime JsRuntime;
 @inject WebApplication1.Data.Repository.IRepository repository;
+@using WebApplication1.Pages.Components;
 
 @page "/todo"
 
@@ -47,13 +48,13 @@
                                 <button class="btn btn-primary" @onclick="(()=>ShowTimeTask(item.Id))">time in days</button>
                             </td>
                             <td>
-
-                                <select class="form-select" aria-label="Default select example">
-                                    <option selected>Назначена</option>
-                                    <option value="1">Выполняется</option>
-                                    <option value="2">Приостановлена</option>
-                                    <option value="3">Завершена</option>
-                                </select>
+                                <button class="btn btn-secondary" @onclick="(()=>ModalShow2(item.Id))">Status</button>
+                                @*<select  class="form-select" aria-label="Default select example">
+                                @foreach (var ithem in StatusList)
+                                 {
+                                    <option @onclick="(()=>ChangeSelectedStatus(ithem.Id))" value="@ithem.Id">@ithem.Name</option>
+                                 }
+                            </select>*@
                             </td>
                             <td>
                                 <button class="btn btn-warning" @onclick="(()=>ModalShow(item.Id))">Update</button>
@@ -63,10 +64,13 @@
                             </td>
                         </tr>
                     </tbody>
+
                 }
 
 
             </table>
+
+            @*<AddTodo />*@
 
 
             <div class="row">
@@ -74,9 +78,11 @@
                     <input class="form-control" placeholder="Type somthing todo" @bind="newTodo" />
                 </div>
                 <div class="col">
-                    <button class="btn btn-success" @onclick="AddTodo">Add todo</button>
+                    <button class="btn btn-success" @onclick="Addtodo">Add todo</button>
                 </div>
             </div>
+
+
 
         </div>
     </div>
@@ -226,10 +232,48 @@
     </div>
 }
 
+@if (showModal2)
+{
+    <div class="modal fade show" id="myModal1" style="display:block" aria-modal="true" role="dialog">
+        <div class="modal-dialog ">
+            <div class="modal-content">
+
+                <!-- Modal Header -->
+                <div class="modal-header">
+                    <h4 class="modal-title">Статус задачи</h4>
+                    <button type="button" class="close" @onclick="@ModalCancel2">&times;</button>
+                </div>
+
+                <!-- Modal body -->
+                <div class="modal-body">
+                    
+                    <div class="mb-3">
+                        Current Task status is @selectedToDO.StatusName
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <select @bind="selectedToDO.StatusId" class="form-select" aria-label="Default select example">
+                                @foreach (var ithem in StatusList)
+                                {
+                                    <option value="@ithem.Id">@ithem.Name</option>
+                                }
+                            </select>
+                        </div>
+                        <div class="col">
+                            <button class="btn btn-success" @onclick="(()=>ChangeSelectedStatus())">change</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+}
 @code {
 
 
     private string newDescription;
+    private int SelectedStatus;
+
     private void AddDescription(int Id, string newDescription)
     {
         if (!string.IsNullOrWhiteSpace(newDescription))
@@ -239,37 +283,59 @@
         showModal1 = false;
     }
 
-    //private DateTime newFinishDate;
-    //private void AddFinishDate(int Id, DateTime newFinishDate) ///Зачем?
-    //{
-
-    //    if (!string.IsNullOrWhiteSpace(newFinishDate.ToString()))
-    //    {
-    //        repository.UpdateToDoFinishDate(Id, newFinishDate);
-    //    }
-    //    showModal = false;
-    //}
-
-    //посчитать продолжительность задачи
 
 
+    private void Addtodo()
+    {
+        if (!string.IsNullOrWhiteSpace(newTodo))
+        {
+            repository.AddTodo(newTodo);
+
+            newTodo = string.Empty;
+        }
+
+    }
+
+    private void ChangeSelectedStatus()
+    {
+        repository.ChangeStatus(selectedToDO);
+    }
+
+    private void ChangeStatusList(int Id)
+    {
+
+    }
 
 
     private async Task ShowTimeTask(int Id)
     {
-        var time=repository.CountTimeTask(Id);
+        var time = repository.CountTimeTask(Id);
         await JsRuntime.InvokeVoidAsync("alert", time); // Alert
-
-
     }
 
     private async Task ShowTimeSubTask(int Id)
     {
         var time = repository.CountTimeSubTask(Id);
         await JsRuntime.InvokeVoidAsync("alert", time); // Alert
-
-
     }
+
+    bool showModal2 = false;
+
+    void ModalShow2(int Id)
+    {
+        showModal2 = true;
+        selectedToDO = todos.Where(All => All.Id == Id).FirstOrDefault();
+        StatusList=repository.GetAvailableStatuses(selectedToDO).ToList();
+    }
+
+
+    void ModalCancel2() => showModal2 = false;
+    void ModalOk2()
+    {
+        Console.WriteLine("Modal ok");
+        showModal2 = false;
+    }
+
 
 
     bool showModal1 = false;
@@ -290,9 +356,6 @@
         showModal1 = false;
     }
 
-
-    ///
-
     bool showModal = false;
 
 
@@ -301,23 +364,14 @@
         showModal = true;
         subtask = repository.GetSubTasks(Id);
         selectedToDO = todos.Where(All => All.Id == Id).FirstOrDefault();
-
     }
-
-
-
-
-
 
     void ModalCancel() => showModal = false;
     void ModalOk()
     {
         Console.WriteLine("Modal ok");
-        //AddFinishDate(Id, newFinishDate);
         showModal = false;
     }
-
-
 
     private IEnumerable<TodoItem> todos = new List<TodoItem>();
     private IEnumerable<SubTask> subtask = new List<SubTask>();
@@ -329,20 +383,9 @@
 
     private string newTodo;
 
-    private void AddTodo()
-    {
-        if (!string.IsNullOrWhiteSpace(newTodo))
-        {
-
-            repository.AddTodo(newTodo);
-
-            newTodo = string.Empty;
-        }
-    }
+    private List<Status> StatusList = new List<Status>();
 
     private TodoItem selectedToDO;
-
-
 
     private void ChangeSubTaskFinishDate(int id)
     {
@@ -366,9 +409,6 @@
         repository.ValueChanged(chengedItem);
     }
 
-
-
-
     private string newSubTask;
     private DateTime SubtaskFinish;
     private string SubtaskWorker;
@@ -384,14 +424,10 @@
             SubtaskFinish = new DateTime();
             SubtaskWorker = string.Empty;
         }
-
     }
 
     private void DeleteSubTask(int id)
     {
         repository.DeleteSubTask(id);
     }
-
-
-
 }

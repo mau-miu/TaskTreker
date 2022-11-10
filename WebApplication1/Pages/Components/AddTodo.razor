@@ -1,0 +1,27 @@
+﻿@inject IJSRuntime JsRuntime;
+@inject WebApplication1.Data.Repository.IRepository repository;
+
+<div class="row">
+    <div class="col">
+        <input class="form-control" placeholder="Type somthing todo" @bind="todoItem.Title" />
+    </div>
+    <div class="col">
+        <button class="btn btn-success" @onclick="Addtodo">Add todo</button>
+    </div>
+</div>
+
+@code {
+    private TodoItem todoItem = new TodoItem() ;
+
+
+    private void Addtodo()
+    {
+        if (!string.IsNullOrWhiteSpace(todoItem.Title))
+        {
+            repository.AddTodo(todoItem.Title);
+
+            todoItem.Title= string.Empty;
+        }
+
+    }
+}
